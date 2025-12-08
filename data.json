@@ -1,0 +1,170 @@
+{
+  "siteTitle": "尤達數理實驗室 - 數位教材中心",
+  "siteDescription": "銘鉑科技 | 互動式教學 / 物理化學實驗 / 效率工具",
+  "sections": [
+    {
+      "title": "🔬 物理與化學實驗室",
+      "items": [
+        {
+          "id": "phys-1",
+          "title": "半圓透鏡折射模擬",
+          "description": "互動式光學實驗，觀察光線在半圓透鏡中的折射路徑。",
+          "url": "https://Miller-hub.github.io/half_circle_refraction/",
+          "tags": ["物理", "光學"],
+          "image": ""
+        },
+        {
+          "id": "phys-2",
+          "title": "三稜鏡色散實驗",
+          "description": "模擬白光通過三稜鏡後的光譜色散現象。",
+          "url": "https://Miller-hub.github.io/prism/",
+          "tags": ["物理", "光學"],
+          "image": ""
+        },
+        {
+          "id": "phys-3",
+          "title": "基礎折射模擬",
+          "description": "調整介質折射率，觀察斯乃爾定律 (Snell's Law) 的變化。",
+          "url": "https://Miller-hub.github.io/refraction/",
+          "tags": ["物理", "模擬"],
+          "image": ""
+        },
+        {
+          "id": "phys-4",
+          "title": "光學實驗台",
+          "description": "綜合光學演示，包含反射與折射的多種情境。",
+          "url": "https://Miller-hub.github.io/light/",
+          "tags": ["物理", "實驗"],
+          "image": ""
+        },
+        {
+          "id": "chem-1",
+          "title": "元素射擊 Element Shooter",
+          "description": "結合射擊遊戲的化學元素記憶練習，快速記住週期表。",
+          "url": "https://Miller-hub.github.io/element-shooter/",
+          "tags": ["化學", "遊戲"],
+          "image": ""
+        },
+        {
+          "id": "art-1",
+          "title": "數位調色盤 Master",
+          "description": "色彩混合原理模擬，適合解說光的三原色與顏料混合。",
+          "url": "https://Miller-hub.github.io/digital-palette-master/",
+          "tags": ["色彩", "應用"],
+          "image": ""
+        }
+      ]
+    },
+    {
+      "title": "📐 數學與邏輯思考",
+      "items": [
+        {
+          "id": "math-1",
+          "title": "畢氏定理演示",
+          "description": "透過視覺化方式證明直角三角形的邊長關係。",
+          "url": "https://Miller-hub.github.io/pythagoras-demo/",
+          "tags": ["數學", "幾何"],
+          "image": ""
+        },
+        {
+          "id": "logic-1",
+          "title": "趣味心理測驗",
+          "description": "課堂間的互動小測驗，放鬆心情與邏輯測試。",
+          "url": "https://Miller-hub.github.io/psych-test/",
+          "tags": ["趣味", "邏輯"],
+          "image": ""
+        }
+      ]
+    },
+    {
+      "title": "⏱️ 效率工具與計時器",
+      "items": [
+        {
+          "id": "timer-1",
+          "title": "通用倒數計時器",
+          "description": "簡單好用的倒數工具，適用於各種教學場景。",
+          "url": "https://Miller-hub.github.io/countdown-timer/",
+          "tags": ["工具"],
+          "image": ""
+        },
+        {
+          "id": "timer-2",
+          "title": "考試專用計時器",
+          "description": "大字體顯示，適合投影在黑板上，讓學生掌握考試時間。",
+          "url": "https://Miller-hub.github.io/test-timer/",
+          "tags": ["考試", "工具"],
+          "image": ""
+        },
+        {
+          "id": "timer-3",
+          "title": "對弈棋鐘",
+          "description": "模擬真實棋鐘，適合雙人對戰或辯論計時。",
+          "url": "https://Miller-hub.github.io/chess-clock-timer/",
+          "tags": ["競賽"],
+          "image": ""
+        },
+        {
+          "id": "timer-4",
+          "title": "即時數位時鐘",
+          "description": "全螢幕顯示目前時間，方便課堂控時。",
+          "url": "https://Miller-hub.github.io/realtime-digital-clock/",
+          "tags": ["時鐘"],
+          "image": ""
+        },
+        {
+          "id": "timer-5",
+          "title": "快問快答計時 (Quickfire)",
+          "description": "短時間高強度的倒數計時，適合搶答環節。",
+          "url": "https://Miller-hub.github.io/quickfire-timer/",
+          "tags": ["遊戲", "互動"],
+          "image": ""
+        },
+        {
+          "id": "tool-1",
+          "title": "學習目標追蹤",
+          "description": "紀錄學習進度與目標達成率 (Goal Tracker)。",
+          "url": "https://Miller-hub.github.io/goal-tracker/",
+          "tags": ["自我管理"],
+          "image": ""
+        }
+      ]
+    },
+    {
+      "title": "📅 生活小幫手",
+      "items": [
+        {
+          "id": "life-1",
+          "title": "西元/民國換算",
+          "description": "快速轉換年份格式，方便查詢歷史年代。",
+          "url": "https://Miller-hub.github.io/convert-ad-to-roc/",
+          "tags": ["工具"],
+          "image": ""
+        },
+        {
+          "id": "life-2",
+          "title": "台灣農曆查詢",
+          "description": "查詢農曆日期與節氣。",
+          "url": "https://Miller-hub.github.io/lunar-calendar-tw/",
+          "tags": ["日曆"],
+          "image": ""
+        },
+        {
+          "id": "life-3",
+          "title": "BMI 健康紀錄",
+          "description": "計算與紀錄身體質量指數。",
+          "url": "https://Miller-hub.github.io/bmi-track/",
+          "tags": ["健康"],
+          "image": ""
+        },
+        {
+          "id": "life-4",
+          "title": "今日運勢",
+          "description": "每日運勢抽籤小遊戲。",
+          "url": "https://Miller-hub.github.io/today-lucky/",
+          "tags": ["趣味"],
+          "image": ""
+        }
+      ]
+    }
+  ]
+}
