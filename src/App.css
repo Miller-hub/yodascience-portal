@@ -1,0 +1,167 @@
+/* 1. 全域設定 */
+:root {
+  --primary-color: #2563eb; /* 科技藍 */
+  --bg-color: #f8fafc;      /* 淺灰背景 */
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-sub: #64748b;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+/* 2. 外框容器 */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* 3. 標題區塊 */
+.site-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.site-title {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  color: #1e293b;
+}
+
+.site-desc {
+  font-size: 1.2rem;
+  color: var(--text-sub);
+}
+
+/* 4. 分類標題 */
+.category-section {
+  margin-bottom: 50px;
+}
+
+.category-title {
+  font-size: 1.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 5. 網格佈局 (RWD) */
+.projects-grid {
+  display: grid;
+  /* 自動填滿：每張卡片最小 300px，最大 1fr */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* 6. 卡片設計 */
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+}
+
+.card:hover {
+  transform: translateY(-5px); /* 浮起效果 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+}
+
+/* 卡片圖片區 */
+.card-image-wrapper {
+  height: 160px;
+  background-color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 沒有圖片時的替代色塊 */
+.card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  font-weight: bold;
+}
+
+/* 卡片內容 */
+.card-content {
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  margin: 0 0 10px 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.card-desc {
+  font-size: 0.95rem;
+  color: var(--text-sub);
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+  flex-grow: 1; /* 讓描述撐開空間，標籤對齊底部 */
+}
+
+/* 7. 標籤 (Tags) */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.tag {
+  font-size: 0.75rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 999px; /* 膠囊形狀 */
+  font-weight: 500;
+}
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  margin-top: 60px;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+}
+
+/* Loading 狀態 */
+.loading {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 1.5rem;
+  color: var(--text-sub);
+}
