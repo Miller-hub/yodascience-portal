@@ -1,6 +1,6 @@
 {
   "siteTitle": "尤達數理實驗室 - 數位教材中心",
-  "siteDescription": "銘鉑科技 | 互動式教學 / 物理化學實驗 / 效率工具",
+  "siteDescription": "互動式教學 / 物理化學實驗 / 效率工具",
   "sections": [
     {
       "title": "🔬 物理與化學實驗室",
@@ -35,6 +35,14 @@
           "description": "綜合光學演示，包含反射與折射的多種情境。",
           "url": "https://Miller-hub.github.io/light/",
           "tags": ["物理", "實驗"],
+          "image": ""
+        },
+        {
+          "id": "phys-5",
+          "title": "日蝕月蝕模擬",
+          "description": "模擬日蝕月蝕現象。",
+          "url": "https://Miller-hub.github.io/eclipse-simulation/",
+          "tags": ["地科", "模擬"],
           "image": ""
         },
         {
