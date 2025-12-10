@@ -37,6 +37,14 @@
           "tags": ["物理", "實驗"],
           "image": ""
         },
+                {
+          "id": "phys-5",
+          "title": "日蝕月蝕模擬",
+          "description": "模擬日蝕月蝕現象。",
+          "url": "https://Miller-hub.github.io/eclipse-simulation/",
+          "tags": ["地科", "模擬"],
+          "image": ""
+        },
         {
           "id": "chem-1",
           "title": "元素射擊 Element Shooter",
