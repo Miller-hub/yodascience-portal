@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雙金屬片虛擬實驗</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --accent-color: #38bdf8;
+            --success-color: #4ade80;
+            --warning-color: #facc15;
+            --danger-color: #ef4444;
+            --nav-bg: #334155;
+            --formula-bg: #0f172a;
+        }
+
+        body {
+            /* 設定字體優先順序，確保中文顯示正常 */
+            font-family: 'Microsoft JhengHei', '微軟正黑體', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 頂部標題列 */
+        .main-nav {
+            background: var(--nav-bg);
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            flex-shrink: 0; /* 防止被壓縮 */
+        }
+
+        .brand {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 主佈局 - 修正版面與外框對齊 */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            flex: 1;
+            overflow: hidden;
+            padding: 20px; /* 外圍統一間距 */
+            gap: 20px;     /* 左右區塊間距 */
+            box-sizing: border-box;
+        }
+
+        /* 左側控制面板 - 改為卡片式 */
+        .sidebar {
+            background: var(--panel-bg);
+            border: 1px solid #334155; /* 改為四周邊框 */
+            border-radius: 12px;       /* 圓角與右側一致 */
+            padding: 20px;
+            overflow-y: auto;          /* 內部捲軸 */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;              /* 填滿 Grid 高度 */
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* 挑戰狀態卡 */
+        .challenge-status-card {
+            background: rgba(56, 189, 248, 0.15);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: none; /* 預設隱藏 */
+            animation: fadeIn 0.5s;
+        }
+        .cs-title { color: var(--accent-color); font-weight: bold; margin-bottom: 5px; font-size: 1rem; display: flex; align-items: center; gap: 5px; }
+        .cs-target { font-size: 0.9rem; color: white; margin-bottom: 10px; line-height: 1.4; }
+        .cs-btn-quit {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ccc;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .cs-btn-quit:hover { background: rgba(255, 255, 255, 0.2); color: white; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 通用控制項 */
+        .section-title {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            background: #0f172a;
+            color: white;
+            border: 1px solid #475569;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .val-disp { font-family: monospace; color: var(--accent-color); }
+
+        .btn {
+            background: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s;
+            font-family: inherit;
+        }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-reset { background: #475569; margin-top: 10px; color: white; }
+        
+        .btn-scenario {
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-scenario:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        /* 右側畫布與數據 */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* 移除內距與背景，改由外層控制 */
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
+
+        .canvas-container {
+            flex: 2;
+            background: #fff;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 250px;
+        }
+        
+        canvas { width: 100%; height: 100%; cursor: crosshair; }
+
+        .data-panel {
+            flex: 1;
+            background: var(--panel-bg);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #334155;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 150px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .formula-box {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .math-row { margin-bottom: 5px; color: #94a3b8; font-size: 0.85rem; }
+        .math-val { color: var(--accent-color); font-weight: bold; }
+        .math-res { color: var(--warning-color); font-weight: bold; font-size: 1.1em; }
+
+        /* 特效元件 */
+        .alarm-status {
+            position: absolute; top: 20px; right: 20px;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .alarm-light {
+            width: 30px; height: 30px; border-radius: 50%; 
+            background: #333; border: 2px solid #555;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+        .alarm-on {
+            background: #ef4444;
+            box-shadow: 0 0 20px #ef4444;
+            animation: pulse 0.5s infinite alternate;
+        }
+        .alarm-label {
+            font-size: 0.75rem; color: #555; font-weight: bold;
+            background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 4px;
+        }
+        @keyframes pulse { to { transform: scale(1.1); opacity: 1; } from { opacity: 0.8; } }
+
+        /* 結果通知 Toast */
+        .result-toast {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 15px 30px; border-radius: 50px; color: white; font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 20;
+            display: none; animation: slideUp 0.3s; text-align: center;
+            min-width: 300px;
+        }
+        .toast-success { background: linear-gradient(135deg, #10b981, #059669); border: 2px solid #6ee7b7; }
+        .toast-fail { background: linear-gradient(135deg, #ef4444, #b91c1c); border: 2px solid #fca5a5; }
+        
+        @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #1e293b;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            position: relative;
+            padding: 0;
+        }
+
+        .modal-header {
+            background: #0f172a;
+            padding: 20px;
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { margin: 0; color: white; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+        .close-btn:hover { color: #ef4444; }
+
+        .modal-body { padding: 20px; }
+
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-color);
+            position: relative;
+        }
+
+        .s-tag { 
+            display: inline-block; 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: bold;
+            margin-bottom: 8px;
+            background: rgba(56, 189, 248, 0.2); 
+            color: var(--accent-color);
+        }
+
+        .s-title { font-size: 1.1rem; color: #f1f5f9; font-weight: bold; margin-bottom: 8px; }
+        .s-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px; }
+        .s-hint { 
+            background: rgba(250, 204, 21, 0.1); 
+            color: #facc15; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            font-size: 0.9rem;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+        
+        .btn-start-challenge {
+            background: var(--accent-color); color: #0f172a; border: none;
+            padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;
+            margin-top: 10px; float: right;
+        }
+        .btn-start-challenge:hover { opacity: 0.9; transform: scale(1.05); }
+
+        /* 物理假設區塊樣式 */
+        .assumptions-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px dashed #475569;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .assumptions-box h3 {
+            margin-top: 0;
+            color: #cbd5e1;
+            font-size: 1rem;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .assumptions-box ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .assumptions-box li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .assumptions-box strong {
+            color: #a5b4fc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 頂部標題 -->
+    <nav class="main-nav">
+        <div class="brand">
+            <i class="fas fa-fire-alt"></i> 雙金屬片虛擬實驗
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <!-- 左側面板 -->
+        <aside class="sidebar">
+            
+            <!-- 挑戰狀態卡 (進行挑戰時顯示) -->
+            <div id="challengeStatus" class="challenge-status-card">
+                <div class="cs-title"><i class="fas fa-flag-checkered"></i> 挑戰進行中</div>
+                <div id="csTargetText" class="cs-target">目標載入中...</div>
+                <button class="cs-btn-quit" onclick="quitChallenge()">
+                    <i class="fas fa-sign-out-alt"></i> 結束挑戰
+                </button>
+            </div>
+
+            <!-- 情境按鈕 (非挑戰時顯示) -->
+            <button id="btnOpenScenario" class="btn btn-scenario" onclick="toggleModal(true)">
+                <i class="fas fa-book-open"></i> 實驗情境
+            </button>
+
+            <div class="section-title">材料選擇 <span style="font-size:0.7em; font-weight:normal;">(α = 線膨脹係數)</span></div>
+            <div class="control-group">
+                <label>上層金屬 (Top)</label>
+                <select id="matTop"></select>
+            </div>
+            <div class="control-group">
+                <label>下層金屬 (Bottom)</label>
+                <select id="matBottom"></select>
+            </div>
+
+            <div class="section-title">物理參數</div>
+            <div class="control-group">
+                <label>長度 (L₀) <span id="valL" class="val-disp">200 mm</span></label>
+                <input type="range" id="sliderL" min="100" max="300" value="200">
+            </div>
+            <div class="control-group">
+                <label>觸點間距 (Gap) <span id="valGap" class="val-disp">3.0 mm</span></label>
+                <input type="range" id="sliderGap" min="0.5" max="10.0" step="0.1" value="3.0">
+            </div>
+
+            <div class="section-title">溫度控制</div>
+            <div class="control-group">
+                <label>環境溫度 <span id="valTemp" class="val-disp">25°C</span></label>
+                <input type="range" id="sliderTemp" min="25" max="200" value="25">
+            </div>
+
+            <button class="btn" id="btnAction" onclick="toggleHeating()">
+                <i class="fas fa-play"></i> 自動加熱測試
+            </button>
+            <button class="btn btn-reset" onclick="resetSim()">
+                <i class="fas fa-undo"></i> 重置狀態
+            </button>
+        </aside>
+
+        <!-- 右側工作區 -->
+        <main class="workspace">
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="simCanvas"></canvas>
+                <div class="alarm-status">
+                    <div id="alarmLight" class="alarm-light"></div>
+                    <div class="alarm-label" id="alarmLabel">未觸發</div>
+                </div>
+                <!-- 結果提示框 -->
+                <div id="resultToast" class="result-toast"></div>
+            </div>
+
+            <!-- 數據面板 -->
+            <div class="data-panel" id="dataPanel">
+                <div style="grid-column: 1 / -1; border-bottom: 1px solid #334155; padding-bottom: 5px; color: #94a3b8; font-size:0.9rem;">
+                    <i class="fas fa-calculator"></i> 實驗數據監控
+                </div>
+
+                <!-- 上層數據 -->
+                <div class="formula-box">
+                    <div style="color:var(--accent-color); margin-bottom:5px;">上層金屬狀態</div>
+                    <div class="math-row">α = <span class="math-val" id="dispAlphaTop">--</span> <span style="font-size:0.8em">10⁻⁶/°C</span></div>
+                    <div class="math-row">伸長量 ΔL = <span class="math-res" id="resDLTop">0.00</span> μm</div>
+                </div>
+
+                <!-- 下層數據 -->
+                <div class="formula-box" style="border-left:1px solid #334155; padding-left:10px;">
+                    <div style="color:var(--warning-color); margin-bottom:5px;">下層金屬狀態</div>
+                    <div class="math-row">α = <span class="math-val" id="dispAlphaBot">--</span> <span style="font-size:0.8em">10⁻⁶/°C</span></div>
+                    <div class="math-row">伸長量 ΔL = <span class="math-res" id="resDLBot">0.00</span> μm</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 詳細情境模態視窗 -->
+    <div id="scenarioModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-tasks"></i> 實驗情境</h2>
+                <button class="close-btn" onclick="toggleModal(false)">&times;</button>
+            </div>
+            <div class="modal-body">
+                
+                <!-- 情境 1 -->
+                <div class="scenario-card">
+                    <span class="s-tag">情境 A：廚房應用 (高靈敏度)</span>
+                    <div class="s-title">精準火災警報系統</div>
+                    <div class="s-desc">
+                        廚房的油煙溫度較高，我們需要設計一個不會誤報的警報器。<br>
+                        <strong>目標：</strong>讓警報器在 <strong>80°C ± 2°C</strong> 時準確響起。40°C 的夏日室溫絕不能觸發。
+                    </div>
+                    <div class="s-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>提示：你需要「最大靈敏度」的材料組合（如黃銅/殷鋼），並仔細微調「觸點間距 (Gap)」來校準觸發點。</div>
+                    </div>
+                    <button class="btn-start-challenge" onclick="startChallenge('A')">接受挑戰</button>
+                    <div style="clear:both;"></div>
+                </div>
+
+                <!-- 情境 2 -->
+                <div class="scenario-card" style="border-left-color: #4ade80;">
+                    <span class="s-tag" style="color:#4ade80; background:rgba(74, 222, 128, 0.2);">情境 B：農業應用 (極高靈敏度)</span>
+                    <div class="s-title">溫室自動開窗器</div>
+                    <div class="s-desc">
+                        植物對溫度很敏感。當溫度從 25°C 上升到 <strong>35°C</strong> (微小溫差) 時，裝置就要動作推開氣窗。
+                    </div>
+                    <div class="s-hint" style="color:#4ade80; background:rgba(74, 222, 128, 0.1);">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>提示：溫差很小，意味著 &Delta;T 很小。為了獲得足夠的彎曲量，你需要將「金屬片長度 (L₀)」拉到最大。</div>
+                    </div>
+                    <button class="btn-start-challenge" style="background:#4ade80; color:#064e3b;" onclick="startChallenge('B')">接受挑戰</button>
+                    <div style="clear:both;"></div>
+                </div>
+
+                <!-- 情境 3 -->
+                <div class="scenario-card" style="border-left-color: #ef4444;">
+                    <span class="s-tag" style="color:#ef4444; background:rgba(239, 68, 68, 0.2);">情境 C：工業安全 (低靈敏度)</span>
+                    <div class="s-title">高溫過載斷路器</div>
+                    <div class="s-desc">
+                        這是一個反向設計。工業馬達允許工作到 100°C，只有在 <strong>120°C</strong> 極高溫時才需要切斷電路（在此模擬中視為觸發）。
+                    </div>
+                    <div class="s-hint" style="color:#ef4444; background:rgba(239, 68, 68, 0.1);">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>提示：你需要一個「遲鈍」的裝置。試著使用膨脹係數差異極小的組合（例如黃銅/紅銅），避免太早觸發。</div>
+                    </div>
+                    <button class="btn-start-challenge" style="background:#ef4444; color:#fff;" onclick="startChallenge('C')">接受挑戰</button>
+                    <div style="clear:both;"></div>
+                </div>
+
+                <!-- 新增：物理模型假設區塊 -->
+                <div class="assumptions-box">
+                    <h3><i class="fas fa-cube"></i> 物理模型假設 (Physical Assumptions)</h3>
+                    <p>這個模擬器建立在理想化的物理環境中，忽略了部分現實世界的干擾因素：</p>
+                    <ul>
+                        <li><strong>均勻受熱 (Uniform Heating)：</strong>假設金屬片從頭到尾的溫度是完全一致的。忽略了熱傳導需要時間，調整溫度滑桿時，整根金屬片會瞬間達到該溫度。</li>
+                        <li><strong>理想黏合 (Perfect Bonding)：</strong>假設上下兩層金屬緊密黏合，中間沒有滑動，且黏著劑不會因為高溫而失效。這迫使兩層金屬因為長度變化不一致而必須彎曲。</li>
+                        <li><strong>線性膨脹 (Linear Expansion)：</strong>使用公式 &Delta;L = L<sub>0</sub> &times; &alpha; &times; &Delta;T。假設在 25&deg;C ~ 200&deg;C 的範圍內，膨脹係數 &alpha; 是常數（實際上高溫下係數可能會微幅改變，但在一般物理實驗中通常視為定值）。</li>
+                        <li><strong>忽略重力與阻力 (Ignore Gravity & Friction)：</strong>金屬片不受重力下垂影響，也不受空氣阻力影響，彎曲完全來自於熱應力。</li>
+                    </ul>
+                </div>
+
+                <button class="btn" style="margin-top: 20px;" onclick="toggleModal(false)">開始實驗</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 資料庫 ---
+        // alpha: 線膨脹係數 (10^-6/C)
+        // c: 比熱 (J/g·C)
+        // rho: 密度 (g/cm^3)
+        const MATERIALS = [
+            { name: '鋁 (Aluminum)', alpha: 23.1, c: 0.90, rho: 2.7, color: '#e2e8f0' },
+            { name: '黃銅 (Brass)', alpha: 19.0, c: 0.38, rho: 8.5, color: '#facc15' },
+            { name: '紅銅 (Copper)', alpha: 17.0, c: 0.39, rho: 8.96, color: '#f87171' },
+            { name: '鐵 (Iron)', alpha: 11.8, c: 0.45, rho: 7.87, color: '#94a3b8' },
+            { name: '白金 (Platinum)', alpha: 8.8, c: 0.13, rho: 21.45, color: '#cbd5e1' },
+            { name: '殷鋼 (Invar)', alpha: 1.2, c: 0.50, rho: 8.1, color: '#475569' }
+        ];
+
+        // --- 挑戰設定 ---
+        const CHALLENGES = {
+            'A': { title: '情境 A：火災警報', targetMin: 78, targetMax: 82, desc: '目標：80°C ± 2°C 觸發 (高靈敏度)', type: 'high_sens' },
+            'B': { title: '情境 B：溫室開窗', targetMin: 34, targetMax: 36, desc: '目標：35°C ± 1°C 觸發 (極高靈敏度)', type: 'max_sens' },
+            'C': { title: '情境 C：過載斷路', targetMin: 115, targetMax: 125, desc: '目標：120°C ± 5°C 觸發 (低靈敏度)', type: 'low_sens' }
+        };
+
+        // --- 應用程式狀態 ---
+        const appState = {
+            matTop: 1,   // Brass
+            matBot: 5,   // Invar
+            length: 200,
+            gap: 3.0,
+            temp: 25,
+            heating: false,
+            alarm: false,
+            activeChallenge: null, // 'A', 'B', 'C' or null
+            challengeCompleted: false
+        };
+
+        const config = {
+            originX: 60,
+            originY: 0, // 在 resize 時計算
+            stripThick: 12,
+            pxPerMm: 1.5
+        };
+
+        // --- 全域變數 (延遲初始化) ---
+        let dom = {};
+        let ctx;
+
+        // --- 初始化 ---
+        function init() {
+            cacheDOM();
+            
+            if(dom.canvas) {
+                ctx = dom.canvas.getContext('2d');
+            } else {
+                console.error("找不到 Canvas 元素");
+                return;
+            }
+
+            populateMaterials();
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 綁定輸入事件
+            dom.matTop.addEventListener('change', (e) => { appState.matTop = +e.target.value; updatePhysics(); });
+            dom.matBot.addEventListener('change', (e) => { appState.matBot = +e.target.value; updatePhysics(); });
+            
+            dom.sliderL.addEventListener('input', (e) => { appState.length = +e.target.value; dom.valL.innerText = appState.length + ' mm'; });
+            dom.sliderGap.addEventListener('input', (e) => { appState.gap = +e.target.value; dom.valGap.innerText = appState.gap.toFixed(1) + ' mm'; });
+            
+            dom.sliderTemp.addEventListener('input', (e) => {
+                appState.temp = +e.target.value;
+                dom.valTemp.innerText = appState.temp + '°C';
+                // 手動拉動時暫停自動加熱
+                appState.heating = false;
+                dom.btnAction.innerHTML = '<i class="fas fa-play"></i> 自動加熱測試';
+            });
+
+            animate();
+        }
+
+        function cacheDOM() {
+            dom = {
+                matTop: document.getElementById('matTop'),
+                matBot: document.getElementById('matBottom'),
+                sliderL: document.getElementById('sliderL'),
+                valL: document.getElementById('valL'),
+                sliderGap: document.getElementById('sliderGap'),
+                valGap: document.getElementById('valGap'),
+                sliderTemp: document.getElementById('sliderTemp'),
+                valTemp: document.getElementById('valTemp'),
+                btnAction: document.getElementById('btnAction'),
+                canvas: document.getElementById('simCanvas'),
+                alarmLight: document.getElementById('alarmLight'),
+                modal: document.getElementById('scenarioModal'),
+                dispAlphaTop: document.getElementById('dispAlphaTop'),
+                resDLTop: document.getElementById('resDLTop'),
+                dispAlphaBot: document.getElementById('dispAlphaBot'),
+                resDLBot: document.getElementById('resDLBot'),
+                // Challenge UI
+                btnOpenScenario: document.getElementById('btnOpenScenario'),
+                challengeStatus: document.getElementById('challengeStatus'),
+                csTargetText: document.getElementById('csTargetText'),
+                resultToast: document.getElementById('resultToast'),
+                alarmLabel: document.getElementById('alarmLabel')
+            };
+        }
+
+        function populateMaterials() {
+            const createOption = (m, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                // 顯示材料名稱與膨脹係數
+                opt.text = `${m.name} [α=${m.alpha}]`; 
+                return opt;
+            };
+            
+            if (!dom.matTop || !dom.matBot) return;
+
+            dom.matTop.innerHTML = '';
+            dom.matBot.innerHTML = '';
+            
+            MATERIALS.forEach((m, i) => {
+                dom.matTop.appendChild(createOption(m, i));
+                dom.matBot.appendChild(createOption(m, i));
+            });
+            
+            dom.matTop.value = appState.matTop;
+            dom.matBot.value = appState.matBot;
+        }
+
+        // --- 模態視窗控制 ---
+        function toggleModal(show) {
+            if (dom.modal) dom.modal.style.display = show ? 'flex' : 'none';
+        }
+
+        // --- 挑戰邏輯 ---
+        function startChallenge(id) {
+            appState.activeChallenge = id;
+            appState.challengeCompleted = false;
+            
+            // 重置並設定初始狀態
+            resetSim();
+            toggleModal(false);
+            
+            // UI 更新
+            dom.challengeStatus.style.display = 'block';
+            dom.btnOpenScenario.style.display = 'none';
+            dom.csTargetText.innerText = CHALLENGES[id].desc;
+            dom.alarmLabel.innerText = "偵測中...";
+        }
+
+        function quitChallenge() {
+            appState.activeChallenge = null;
+            appState.challengeCompleted = false;
+            
+            dom.challengeStatus.style.display = 'none';
+            dom.btnOpenScenario.style.display = 'flex';
+            dom.alarmLabel.innerText = "觸發點 ~80°C"; // 回復預設
+            hideToast();
+        }
+
+        function checkChallengeSuccess(triggerTemp) {
+            if (!appState.activeChallenge || appState.challengeCompleted) return;
+            
+            const config = CHALLENGES[appState.activeChallenge];
+            const mTop = MATERIALS[appState.matTop];
+            const mBot = MATERIALS[appState.matBot];
+            const deltaAlpha = Math.abs(mTop.alpha - mBot.alpha);
+
+            appState.challengeCompleted = true; // 防止重複觸發
+            appState.heating = false; // 暫停加熱
+            dom.btnAction.innerHTML = '<i class="fas fa-play"></i> 重新測試';
+
+            // 1. 檢查溫度是否達標
+            const tempOk = (triggerTemp >= config.targetMin && triggerTemp <= config.targetMax);
+            
+            // 2. 檢查材料選擇 (情境特有的物理限制)
+            let materialOk = true;
+            let failReason = "";
+
+            if (config.type === 'high_sens' || config.type === 'max_sens') {
+                // 高靈敏度情境：必須選膨脹係數差異大的材料 (例如差值 > 10)
+                if (deltaAlpha < 10) {
+                    materialOk = false;
+                    failReason = "材料膨脹係數差異太小，靈敏度不足！請選擇差異更大的組合（如黃銅/殷鋼）。";
+                }
+            } else if (config.type === 'low_sens') {
+                // 低靈敏度情境
+                // 這裡我們放寬一點，主要看是否能達到高溫
+                // 如果太早觸發通常是材料選錯
+                if (triggerTemp < 100) {
+                    // 如果觸發溫度太低，提示更換材料
+                    // 但這裡主要由 tempOk 判斷，若 tempOk 為 false，下面會處理
+                }
+            }
+
+            if (tempOk && materialOk) {
+                showToast(true, `🎉 挑戰成功！觸發溫度 ${triggerTemp.toFixed(1)}°C`);
+            } else if (!tempOk) {
+                let reason = triggerTemp < config.targetMin ? "太早觸發" : "太晚觸發";
+                // 針對情境 C 的特殊提示
+                if (config.type === 'low_sens' && triggerTemp < config.targetMin) {
+                    reason += "。提示：此材料組合反應太快，請選用較遲鈍的組合（如黃銅/紅銅）。";
+                }
+                showToast(false, `❌ 失敗！${reason} (觸發: ${triggerTemp.toFixed(1)}°C)`);
+            } else if (!materialOk) {
+                showToast(false, `❌ 失敗！${failReason}`);
+            }
+        }
+
+        function showToast(success, msg) {
+            dom.resultToast.innerText = msg;
+            dom.resultToast.className = 'result-toast ' + (success ? 'toast-success' : 'toast-fail');
+            dom.resultToast.style.display = 'block';
+            
+            // 5秒後自動消失
+            setTimeout(() => {
+                dom.resultToast.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideToast() {
+            dom.resultToast.style.display = 'none';
+        }
+
+        // --- 物理與控制 ---
+        function toggleHeating() {
+            appState.heating = !appState.heating;
+            if (appState.heating) {
+                dom.btnAction.innerHTML = '<i class="fas fa-pause"></i> 暫停測試';
+                if (appState.temp >= 200) appState.temp = 25; // 重置
+                
+                // 挑戰開始新的一輪
+                if (appState.activeChallenge) {
+                    appState.challengeCompleted = false;
+                    hideToast();
+                }
+            } else {
+                dom.btnAction.innerHTML = '<i class="fas fa-play"></i> 繼續測試';
+            }
+        }
+
+        function resetSim() {
+            appState.heating = false;
+            appState.temp = 25;
+            appState.alarm = false;
+            dom.valTemp.innerText = '25°C';
+            dom.sliderTemp.value = 25;
+            dom.btnAction.innerHTML = '<i class="fas fa-play"></i> 自動加熱測試';
+            dom.alarmLight.classList.remove('alarm-on');
+            hideToast();
+        }
+
+        function updatePhysics() {
+            const mTop = MATERIALS[appState.matTop];
+            const mBot = MATERIALS[appState.matBot];
+            
+            // 更新 UI 顯示的數值 (預設顯示)
+            if(dom.dispAlphaTop) dom.dispAlphaTop.innerText = mTop.alpha;
+            if(dom.dispAlphaBot) dom.dispAlphaBot.innerText = mBot.alpha;
+        }
+
+        function animate() {
+            // 1. 物理更新 Loop
+            if (appState.heating) {
+                let step = 0.5; // 升溫速度
+                
+                if (appState.temp < 200) {
+                    appState.temp += step;
+                    dom.sliderTemp.value = appState.temp;
+                    dom.valTemp.innerText = Math.floor(appState.temp) + '°C';
+                } else {
+                    appState.heating = false;
+                    dom.btnAction.innerHTML = '<i class="fas fa-undo"></i> 測試結束 (重置)';
+                }
+            }
+
+            // 2. 數據更新
+            const dT = appState.temp - 25;
+            const mTop = MATERIALS[appState.matTop];
+            const mBot = MATERIALS[appState.matBot];
+            
+            // 顯示微米伸長量
+            const dlTop = appState.length * (mTop.alpha * 1e-6) * dT * 1000;
+            const dlBot = appState.length * (mBot.alpha * 1e-6) * dT * 1000;
+            
+            if(dom.dispAlphaTop) dom.dispAlphaTop.innerText = mTop.alpha;
+            if(dom.dispAlphaBot) dom.dispAlphaBot.innerText = mBot.alpha;
+            if(dom.resDLTop) dom.resDLTop.innerText = dlTop.toFixed(2);
+            if(dom.resDLBot) dom.resDLBot.innerText = dlBot.toFixed(2);
+
+            // 3. 繪圖
+            draw(mTop, mBot, dT);
+            
+            requestAnimationFrame(animate);
+        }
+
+        function draw(mTop, mBot, dT) {
+            ctx.clearRect(0, 0, dom.canvas.width, dom.canvas.height);
+            
+            const startX = config.originX;
+            const startY = dom.canvas.height / 2;
+            
+            // 物理彎曲模擬 (視覺放大)
+            const dAlpha = (mTop.alpha - mBot.alpha) * 1e-6;
+            const bendFactor = 0.8; // 大幅增加係數以配合真實物理單位的微小數值
+            const deflection = appState.length * appState.length * dAlpha * dT * bendFactor;
+            
+            // 繪製牆壁
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(0, 0, startX, dom.canvas.height);
+            
+            // 繪製金屬片 (使用貝茲曲線)
+            const endX = startX + appState.length * config.pxPerMm;
+            const endY = startY + deflection;
+            const cpX = (startX + endX) / 2;
+            const cpY = startY + deflection / 2;
+
+            drawStripPart(mTop.color, startX, startY - config.stripThick, cpX, cpY - config.stripThick, endX, endY - config.stripThick);
+            drawStripPart(mBot.color, startX, startY, cpX, cpY, endX, endY);
+            
+            // 繪製觸點
+            const gapPx = appState.gap * 10;
+            const contactX = endX;
+            const contactY = startY + gapPx + config.stripThick;
+            
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(contactX - 10, contactY, 20, 60);
+            ctx.beginPath();
+            ctx.arc(contactX, contactY, 5, 0, Math.PI*2);
+            
+            // 接觸判定
+            // 條件：向下彎 (>0) 且 超過 Gap
+            const currentTipY = endY + config.stripThick;
+            const isTouching = (deflection > 0) && (currentTipY >= contactY);
+            
+            if (isTouching) {
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+                if (!appState.alarm) {
+                    // 警報觸發瞬間 (Rising Edge)
+                    appState.alarm = true;
+                    dom.alarmLight.classList.add('alarm-on');
+                    playBeep();
+                    
+                    // 檢查挑戰是否成功
+                    if (appState.activeChallenge) {
+                        checkChallengeSuccess(appState.temp);
+                    }
+                }
+            } else {
+                ctx.fillStyle = '#94a3b8';
+                ctx.fill();
+                appState.alarm = false;
+                dom.alarmLight.classList.remove('alarm-on');
+            }
+
+            // 繪製火焰 (手動或自動高溫時)
+            if (appState.heating || appState.temp > 40) {
+                drawFlame(startX + (appState.length * config.pxPerMm)/2, startY + 80);
+            }
+        }
+
+        function drawStripPart(color, x0, y0, cpx, cpy, x1, y1) {
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.quadraticCurveTo(cpx, cpy, x1, y1);
+            ctx.lineTo(x1, y1 + config.stripThick);
+            ctx.quadraticCurveTo(cpx, cpy + config.stripThick, x0, y0 + config.stripThick);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.stroke();
+        }
+
+        let flameT = 0;
+        function drawFlame(x, y) {
+            flameT += 0.2;
+            const scale = (appState.temp - 25) / 100;
+            if (scale <= 0) return;
+            
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            ctx.beginPath();
+            ctx.moveTo(-15, 0);
+            ctx.quadraticCurveTo(0, -60 - Math.sin(flameT)*5, 15, 0);
+            ctx.fillStyle = 'rgba(255, 100, 0, 0.6)';
+            ctx.fill();
+            ctx.restore();
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g);
+            g.connect(audioCtx.destination);
+            osc.frequency.value = 880;
+            g.gain.value = 0.1;
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function resizeCanvas() {
+            const wrap = document.getElementById('canvasContainer');
+            dom.canvas.width = wrap.clientWidth;
+            dom.canvas.height = wrap.clientHeight;
+        }
+
+        // --- 啟動 (確保 DOM 載入後執行) ---
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+    </script>
+</body>
+</html>
